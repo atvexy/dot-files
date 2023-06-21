@@ -1,0 +1,14 @@
+#!/bin/sh
+
+symbol() {
+[ $(cat /sys/class/net/wlan*/operstate) = down ] && echo 󰤯 && exit
+echo 󰤨
+}
+
+name() {
+[ $(cat /sys/class/net/wlan*/operstate) = up ] && nmcli | grep -m1 "wlan0" | sed 's/\ connected\ to\ //g' | cut -d ':' -f2 && exit
+echo "Not Connected"
+}
+
+[ "$1" = "icon" ] && symbol && exit
+[ "$1" = "name" ] && name && exit

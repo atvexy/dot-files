@@ -1,0 +1,8 @@
+# after-resume launches eww as a fix for eww exiting when going to sleep
+
+swayidle -w \
+  timeout 300 '~/.config/hypr/scripts/lock' \
+  timeout 15 '[ -f ~/.config/hypr/scripts/screen-locked.lock ] && hyprctl dispatch dpms off' \
+    resume 'hyprctl dispatch dpms on' \
+  after-resume 'eww -c ~/.config/eww/bar2 open bar && hyprctl dispatch dpms on'
+  before-sleep '~/.config/hypr/scripts/lock'

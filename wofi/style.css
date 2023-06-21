@@ -1,0 +1,12 @@
+window {
+    background-color: #1A1B26;
+    border-radius: 15px;
+}
+
+#input {
+    margin: .5rem 0 .5rem 0;
+}
+
+#outer-box {
+    margin: .1rem .5rem .1rem .5rem;
+}

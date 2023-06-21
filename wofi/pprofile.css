@@ -1,0 +1,33 @@
+/* Created   by https://github.com/Caszual 
+   Designed  by https://github.com/Caszual
+*/
+
+/* Hardcoded colors taken from eww style css file */
+
+window {
+    background-color: #1A1B26;
+    border-radius: 10px;
+}
+
+
+#input {
+    margin: .5rem 1rem .5rem 1rem;
+}
+
+/* https://www.reddit.com/r/swaywm/comments/wy40so/remove_search_icon_in_wofi/ */
+#input > image.left {
+    -gtk-icon-transform:scaleX(0);
+}
+
+#input > image.right {
+    -gtk-icon-transform:scaleX(0);
+}
+
+#entry {
+    background-color: #24283B;
+    margin: .25rem .5rem .25rem .5rem;
+}
+
+#entry:selected {
+    background-color: #73DACA;
+}

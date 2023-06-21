@@ -1,0 +1,251 @@
+;; Created   by https://github.com/Caszual
+;; Designed  by https://github.com/Caszual
+
+;; Variables
+
+(defpoll battery :interval "15s" "./scripts/battery percent")
+(defpoll battery-icon :interval "2s" "./scripts/battery icon")
+(defpoll battery-status :interval "2s" "./scripts/battery status")
+
+(defpoll used-ram :interval "2s" "./scripts/system ram")
+(defpoll used-ram-gb :interval "2s" "./scripts/system ram-gb")
+(defpoll cpu-util :interval "1s" "./scripts/system cpu")
+
+(defvar wifi false)
+(defpoll wifi-icon :interval "5s" "./scripts/wifi icon")
+(defpoll wifi-name :interval "5s" "./scripts/wifi name")
+
+(defvar brightness false)
+(defpoll current-brightness :interval "1s" "brightnessctl -m -d amdgpu_bl0 | awk -F, '{print substr($4, 0, length($4)-1)}' | tr -d '%'")
+
+(defvar volume false)
+(defpoll current-volume :interval "1s" "amixer -D pulse sget Master | grep 'Left:' | awk -F'[][]' '{ print $2 }' | tr -d '%'")
+
+(defpoll hour	:interval "1s"	"date '+%H'")
+(defpoll min	:interval "1s"	"date '+%M'")
+
+(deflisten workspaces :initial "[]" "bash ./scripts/get-workspaces")
+(deflisten current-workspace :initial "1" "bash ./scripts/get-active-workspace")
+
+(defvar eww "eww -c $HOME/.config/eww/bar2")
+
+;; Widgets
+
+(defwidget power []
+	(box 		:class "powermenu-module"
+				:orientation "h"
+		 		:space-evenly "false" 
+	(button 	:class "button-powermenu"
+				:onclick "./scripts/launch pmenu > /dev/null" ;; only works if stdout is taken idk
+				:tooltip "Power Menu"
+				:orientation "h" "")
+))
+
+(defwidget sep []
+	(box 		:class "sep"
+				:vexpand "false" 
+				:hexpand "false"
+	(label 
+				:class "separ" 
+				:text "")
+))
+
+(defwidget bat []
+	(box		:class "bat-module"
+				:vexpand "false"
+				:hexpand "false"
+	(circular-progress
+				:class "bat-bar"
+				:value "${battery * 0.75}"
+				;:value 75
+				:thickness 4
+				:start-at 37.5
+			  	:min 0
+				:tooltip "Battery: ${battery}% ${battery-status}"
+	(box		:class "bat-label-box"
+	(label 	:class "bat-label"
+			:text battery-icon)
+))))
+
+(defwidget ram []
+	(box		:class "ram-module"
+				:vexpand "false"
+				:hexpand "false"
+				:tooltip "Used Ram: ${round(used-ram,1)}% (${round(used-ram-gb,2)} Gb)"
+	(circular-progress
+				:class "ram-bar"
+				:value "${used-ram * 0.75}"
+				:thickness 4
+				:start-at 37.5
+			  	:min 0
+	(box		:class "ram-label-box"
+	(label 		:class "ram-label"
+				:text "")
+))))
+
+(defwidget cpu []
+	(box		:class "cpu-module"
+				:vexpand "false"
+				:hexpand "false"
+				:tooltip "Cpu Usage: ${round(cpu-util,1)}%"
+				:halign "center"
+	(circular-progress
+				:class "cpu-bar"
+				:value "${cpu-util * 0.75}"
+				:thickness 4
+				:start-at 37.5
+			  	:min 0 
+	(box		:class "cpu-label-box"
+	(label 		:class "cpu-label"
+				:text "󰍛")
+))))
+
+(defwidget wifi []
+	(eventbox 	:onhover "${eww} update wifi=true"   
+  				:onhoverlost "${eww} update wifi=false"
+	(box		:class "wifi-module"
+				:orientation "h"
+				:space-evenly "false"
+				:spacing "4"
+	(revealer	:transition "slideleft"
+				:reveal wifi
+				:duration "550ms"
+	(label 		:class "wifi-label"
+				:text wifi-name))
+	(button		:onclick "./scripts/popup wifi" 
+				:class "wifi-icon" wifi-icon)
+)))
+
+(defwidget bright []
+	(eventbox	:onhover "${eww} update brightness=true"
+				:onhoverlost "${eww} update brightness=false"
+	(box		:class "bright-module"
+				:orientation "h"
+				:space-evenly "false"
+				:spacing "4"
+	(revealer	:transition "slideleft"
+				:reveal brightness
+				:duration "550ms"
+	(scale		:class "bright-bar"
+				:value current-brightness
+				:tooltip "Brightness: ${current-brightness}%"
+				:onchange "brightnessctl set {}%" 
+				:orientation "h" 
+				:flipped true 
+				:max 101 
+				:min 0))
+	(label		:class "bright-icon"
+				:text "󰃠")
+)))
+
+(defwidget volume []
+	(eventbox 	:onhover "${eww} update volume=true" 		
+			  	:onhoverlost "${eww} update volume=false"
+	(box      	:class "volume-module"
+				:orientation "h"
+				:space-evenly "false"
+				:spacing "4"
+	(revealer 	:transition "slideleft" 
+			  	:reveal volume
+			  	:duration "550ms"
+	(scale    	:class "volume-bar" 	  
+			  	:value current-volume 
+			  	:orientation "h"      
+			  	:flipped true 
+			  	:tooltip "Volume: ${current-volume}%" 
+			  	:max 101 
+			  	:min 0 
+			  	:onchange "amixer -D pulse sset Master {}%" ))
+	(button   	:onclick "scripts/popup audio"   
+				:class "volume-icon" "󰕾")
+)))
+
+(defwidget time []
+	(box	:orientation "h" 
+			:class "time-module" 
+			:halign "center"
+			:space-evenly false
+	(button	:onclick "scripts/popup calendar"	
+			:class "time-hour" hour)
+	(label	:text ""	
+			:class "time-separator")
+	(button	:onclick "scripts/popup calendar"	
+			:class "time-min"  min)
+))
+
+(defwidget launcher []
+	(button :class "launcher-button" 
+		   	:onclick "scripts/popup launcher &"  "󰣇")
+)
+
+(defwidget workspaces []
+  	(eventbox 	:onscroll "bash ~/.config/eww/scripts/change-active-workspace {} ${current-workspace}" :class "workspaces-widget"
+    (box 		:space-evenly true
+	(label 		:text "${workspaces}${current-workspace}" :visible false)
+    (for workspace in workspaces
+    (eventbox 	:onclick "hyprctl dispatch workspace ${workspace.id}"
+        (box 	:class "workspace-entry ${workspace.id == current-workspace ? "current" : ""} ${workspace.windows > 0 ? "occupied" : "empty"}"
+        (label :text "${workspace.id == current-workspace ? "" : ""}")
+	)))
+)))
+
+;; composite widgets
+
+(defwidget right []
+	(box		:class "right-bar"
+				:vexpand "false"
+				:hexpand "false"
+				:halign "end"
+				:space-evenly "false"
+	(wifi)
+	(bright)
+	(volume)
+	(sep)
+	(box		:class "system-module"
+	(bat)
+	(ram)
+	(cpu))
+	(sep)
+	(power)
+))
+
+(defwidget center []
+	(box		:class "center-bar"
+				:vexpand "false"
+				:hexpand "false"
+				:halign "center"
+	(time)
+))
+
+(defwidget left []
+	(box		:class "left-bar"
+				:vexpand "false"
+				:hexpand "false"
+				:halign "start"
+				:space-evenly "false"
+	(launcher)
+	(sep)
+	(workspaces)
+))
+
+(defwidget bar []
+	(box		:vexpand "false"
+				:hexpand "false"
+				:space-evenly "true"
+	(left)
+	(center)
+	(right)
+))
+
+;; Windows
+
+(defwindow bar
+	:geometry (geometry :x "0" 
+						:y "0" 
+						:width "100%" 
+						:height "25px"
+						:anchor "center top")
+	:monitor 0
+	:stacking "fg"
+	:exclusive true
+(bar))

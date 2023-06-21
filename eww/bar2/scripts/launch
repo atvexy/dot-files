@@ -1,0 +1,29 @@
+#!/bin/sh
+
+power_menu(){
+option="$(echo -n "Shutdown;Reboot;Sleep;Hibernate;Lock;Cancel" | wofi -c ~/.config/wofi/menu -s ~/.config/wofi/pmenu.css)"
+
+[ -z "$option" ] && exit
+[ $option = "Cancel" ] && exit
+
+[ $option = "Shutdown" ] && systemctl poweroff && exit
+[ $option = "Reboot" ] && systemctl reboot && exit
+[ $option = "Sleep" ] && systemctl suspend && exit
+[ $option = "Hibernate" ] && systemctl hibernate && exit
+[ $option = "Lock" ] && ~/.config/hypr/scripts/lock && exit
+}
+
+profile_menu(){
+option="$(echo -n "Performance;Balanced;Power Saver" | wofi -c ~/.config/wofi/menu -s ~/.config/wofi/pprofile.css)"
+
+[ -z "$option" ] && exit
+
+[ "$option" = "Performance" ] && powerprofilesctl set performance && exit
+[ "$option" = "Balanced" ] && powerprofilesctl set balanced && exit
+[ "$option" = "Power Saver" ] && powerprofilesctl set power-saver && exit
+exit
+}
+
+[ "$1" = "pmenu" ] && power_menu && exit
+[ "$1" = "pprofile" ] && profile_menu && exit
+exit

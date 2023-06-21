@@ -1,0 +1,18 @@
+#!/bin/sh
+
+ram() {
+echo $(free | grep Mem | awk '{print $3/$2 * 100.0}')
+}
+
+ram_gb() {
+echo $(free | grep Mem | awk '{print $3 / 1000000.0}')
+}
+
+cpu() {
+echo $(awk '{u=$2+$4; t=$2+$4+$5; if (NR==1){u1=u; t1=t;} else print ($2+$4-u1) * 100 / (t-t1); }' <(grep 'cpu ' /proc/stat) <(sleep 1;grep 'cpu ' /proc/stat))
+}
+
+[ "$1" = "ram" ] && ram && exit
+[ "$1" = "ram-gb" ] && ram_gb && exit
+[ "$1" = "cpu" ] && cpu && exit
+exit
