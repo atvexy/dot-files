@@ -1,6 +1,0 @@
-#!/bin/sh
-
-tail --pid=$(ps -ef | grep swaylock | xargs | awk '{print $2}') -f /dev/null
-
-#unlock the lock file
-rm -f ~/.config/hypr/scripts/screen-locked.lock

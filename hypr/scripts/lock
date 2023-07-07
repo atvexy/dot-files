@@ -1,19 +1,11 @@
 #!/bin/bash
 
-#check if already locked
-[ -f ~/.config/hypr/scripts/screen-locked.lock ] && exit 0
+(
+# lock file, will only unlock when swaylock exits
+flock -w 2 -n 9 || exit 0
 
-#lock file signalizes to the idle script to include lock idle timeouts
-echo -e "DATE:$(date)\nUSER:$(whoami)\nPID:$$" > ~/.config/hypr/scripts/screen-locked.lock
+swaylock     -f    --screenshots   --clock         --indicator     --indicator-radius 100    --indicator-thickness 7         --effect-blur 7x5       --effect-vignette 0.5:0.5         --ring-color bb00cc     --key-hl-color 880033   --line-color 00000000     --inside-color 00000088         --separator-color 00000000      --grace 2       --fade-in 0.2
 
-swaylock    -f     --screenshots   --clock         --indicator     --indicator-radius 100    --indicator-thickness 7         --effect-blur 7x5       --effect-vignette 0.5:0.5         --ring-color bb00cc     --key-hl-color 880033   --line-color 00000000     --inside-color 00000088         --separator-color 00000000      --grace 2       --fade-in 0.2
-
-#unlock the lock file when unlocked
-~/.config/hypr/scripts/wait-for-unlock &
-
-function after_lock {
-  sleep 15
-  [ -f ~/.config/hypr/scripts/screen-locked.lock ] && hyprctl dispatch dpms off
-}
-
-after_lock &
+#run separed swayidle with extra timeouts for when locked
+~/.config/hypr/scripts/locked-idle &
+)9>/tmp/session-lock.lock

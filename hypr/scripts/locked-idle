@@ -1,0 +1,17 @@
+#!/bin/sh
+
+#another swayidle with different timings for when locked
+swayidle -w \
+  timeout 15 'hyprctl dispatch dpms off' \
+    resume 'hyprctl dispatch dpms on' &
+
+lock_pid=$!
+
+tail --pid=$(ps -ef | grep swaylock | xargs | awk '{print $2}') -f /dev/null
+
+# stop the lock swayidle
+kill -INT "$lock_pid"
+
+hyprctl dispatch dpms on
+
+#after exit /tmp/session-lock.lock will be removed
